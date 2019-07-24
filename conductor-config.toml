@@ -1,0 +1,22 @@
+[[dnas]]
+file = "/home/josh/app/junto-rust/dist/junto-rust.dna.json"
+id = "junto app"
+
+[[interfaces]]
+id = "http interface"
+admin = true
+
+    [[interfaces.instances]]
+    id = "junto instance"
+
+    [interfaces.driver]
+    type = "http"
+    port = 4000
+
+bridges = []
+
+signing_service_uri = "http://localhost:8888"
+
+agents = []
+
+instances = []
