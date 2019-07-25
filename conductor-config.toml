@@ -1,6 +1,63 @@
 [[dnas]]
-file = "/home/josh/app/junto-rust/dist/junto-rust.dna.json"
-id = "junto app"
+file = "/holochain/dnas/Junto/dist/Junto.dna.json"
+id = "junto-app"
+
+[[dnas]]
+file = "/holochain/dnas/DeepKey/dist/DeepKey.dna.json"
+id = "deepkey"
+
+persistence_dir = "/holochain/persistence"
+signing_service_uri = "http://localhost:8888"
+
+[dpki]
+instance_id = "dpki_happ"
+
+#Agent for hosting applications
+[[agents]]
+id = "host-agent"
+name = "Envoy Host"
+keystore_file = "/holochain/keys/host"
+public_address = ""
+
+#Agent for making config changes to Jutnto
+[[agents]]
+id  = "junto-config-agent"
+name = "Junto Config"
+keystore_file = "/holochain/keys/config"
+public_address = ""
+
+[[instances]]
+agent = "host-agent"
+dna = "junto"
+id = "junto-app"
+[instances.storage]
+path = "/holochain/junto/storage/"
+type = "file"
+
+[[instances]]
+agent = "junto-config-agent"
+dna = "junto"
+id = "junto-app"
+[instances.storage]
+path = "/holochain/junto/storage"
+type = "file"
+
+#DeepKey instances
+[[instances]]
+agent = "host-agent"
+dna = "deepkey"
+id = "dpki_happ"
+[instances.storage]
+path = "/holochain/deepkey/storage"
+type = "file"
+
+[[instances]]
+agent = "junto-config-agent"
+dna = "deepkey"
+id = "deepkey"
+[instances.storage]
+path = "/holochain/deepkey/storage/"
+type = "file"
 
 [[interfaces]]
 id = "http interface"
@@ -12,11 +69,3 @@ admin = true
     [interfaces.driver]
     type = "http"
     port = 4000
-
-bridges = []
-
-signing_service_uri = "http://localhost:8888"
-
-agents = []
-
-instances = []
