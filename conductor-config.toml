@@ -1,70 +1,79 @@
+persistence_dir = "/holochain/persistence"
+signing_service_uri = "http://localhost:8888"
+
 [[dnas]]
-file = "/holochain/dnas/Junto/dist/Junto.dna.json"
+file = "/holochain/dnas/Junto/junto-rust/dist/junto-rust.dna.json"
 id = "junto-app"
+hash = "QmZNgsWfv1LzccHMC8oSq8FrFy1gFhEYrtiYeMxDP7aq2B"
 
 [[dnas]]
 file = "/holochain/dnas/DeepKey/dist/DeepKey.dna.json"
 id = "deepkey"
-
-persistence_dir = "/holochain/persistence"
-signing_service_uri = "http://localhost:8888"
-
-[dpki]
-instance_id = "dpki_happ"
+hash = "QmdEqRWmJ7MGfxQVKJcqdzghQ19ynK7CanUeTQFMoFeiPo"
 
 #Agent for hosting applications
 [[agents]]
 id = "host-agent"
 name = "Envoy Host"
 keystore_file = "/holochain/keys/host"
-public_address = ""
+public_address = "HcSci6Ejq6xp4IpaechQH4S4dotrcfywmXUY9M3JJzh9aus8MGBF6IQ9IPqvy4z"
 
 #Agent for making config changes to Jutnto
 [[agents]]
 id  = "junto-config-agent"
 name = "Junto Config"
 keystore_file = "/holochain/keys/config"
-public_address = ""
+public_address = "HcScI4EFcxWw995w6gpUKuqZfJntvhireA8AQXmZ5fod97ou4v57xRBgfzz9kca"
 
 [[instances]]
 agent = "host-agent"
-dna = "junto"
-id = "junto-app"
+dna = "junto-app"
+id = "junto-app-host"
 [instances.storage]
-path = "/holochain/junto/storage/"
+path = "/holochain/junto/storage/host"
 type = "file"
 
 [[instances]]
 agent = "junto-config-agent"
-dna = "junto"
-id = "junto-app"
+dna = "junto-app"
+id = "junto-app-config"
 [instances.storage]
-path = "/holochain/junto/storage"
+path = "/holochain/junto/storage/config"
 type = "file"
 
 #DeepKey instances
 [[instances]]
 agent = "host-agent"
 dna = "deepkey"
-id = "dpki_happ"
+id = "deepkey-host"
 [instances.storage]
-path = "/holochain/deepkey/storage"
+path = "/holochain/deepkey/storage/host"
 type = "file"
 
 [[instances]]
 agent = "junto-config-agent"
 dna = "deepkey"
-id = "deepkey"
+id = "deepkey-config"
 [instances.storage]
-path = "/holochain/deepkey/storage/"
+path = "/holochain/deepkey/storage/config"
 type = "file"
 
+#Interfaces for DNA's
 [[interfaces]]
 id = "http interface"
 admin = true
 
     [[interfaces.instances]]
-    id = "junto instance"
+    id = "junto-app-config"
+
+    [[interfaces.instances]]
+    id = "junto-app-host"
+
+    [[interfaces.instances]]
+    id = "deepkey-host"
+
+    [[interfaces.instances]]
+    id = "deepkey-config"
 
     [interfaces.driver]
     type = "http"
