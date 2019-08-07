@@ -58,6 +58,17 @@ id = "deepkey-config"
 path = "/holochain/deepkey/storage/config"
 type = "file"
 
+[[bridges]]
+caller_id = "junto-app-config"
+callee_id = "deepkey-config"
+handle = "deepkey_bridge"
+
+[[bridges]]
+caller_id = "junto-app-host"
+callee_id = "deepkey-host"
+handle = "deepkey_bridge"
+
+
 #Interfaces for DNA's
 [[interfaces]]
 id = "http interface"
@@ -78,3 +89,7 @@ admin = true
     [interfaces.driver]
     type = "http"
     port = 4000
+
+[network]
+type = "n3h"
+n3h_persistence_path = "/holochain/network_files"

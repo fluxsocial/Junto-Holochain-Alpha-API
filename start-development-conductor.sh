@@ -31,4 +31,4 @@ else
     echo -e "\e[32mHolochain DNA and directories setup"
 fi
 
-holochain --config ~/Junto-Alpha-API/conductor-config.toml
+holochain --config ~/Junto-Alpha-API/development-conductor-config.toml
