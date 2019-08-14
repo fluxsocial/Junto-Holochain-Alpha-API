@@ -3,5 +3,5 @@ CREATE TABLE users (
     id UUID PRIMARY KEY,
     email varchar,
     password varchar,
-    agent_key varchar
+    pub_address varchar
 )
