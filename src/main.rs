@@ -42,6 +42,6 @@ fn main() -> io::Result<()> {
     .bind("127.0.0.1:8080")?
     .start();
 
-     println!("Started http server: 127.0.0.1:8080");
+    println!("Started http server: 127.0.0.1:8080");
     sys.run()
 }
