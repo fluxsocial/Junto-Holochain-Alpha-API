@@ -9,6 +9,7 @@ use actix_web::{
 use futures::future::Future;
 use std::path::Path;
 use bcrypt::{hash, verify};
+use listenfd::ListenFd;
 
 pub mod db;
 pub mod utils;
@@ -35,19 +36,24 @@ fn register(data: web::Json<db::models::RegisterData>, pool: web::Data<db::Pool>
 fn main() -> io::Result<()> {
     let path = Path::new("./src/development.env");
     dotenv::from_path(&path).expect("Unable to load .env");
+    
     let sys = actix_rt::System::new("api");
-
     let pool = utils::load_connection_pool();
+    let mut listenfd = ListenFd::from_env();
 
-    HttpServer::new(move || {
+    let mut server = HttpServer::new(move || {
         App::new()
             .data(pool.clone())
             .wrap(middleware::Logger::default())
-            .route("/", web::to(index))
-            .route("/register", web::to_async(register))
-    })
-    .bind("127.0.0.1:8080")?
-    .start();
+            .route("/", web::get().to(index))
+            .route("/register", web::post().to_async(register))
+    });
+    server = if let Some(l) = listenfd.take_tcp_listener(0).unwrap() {
+        server.listen(l).unwrap()
+    } else {
+        server.bind("127.0.0.1:8080").unwrap()
+    };
+    server.start();
 
     println!("Started http server: 127.0.0.1:8080");
     sys.run()

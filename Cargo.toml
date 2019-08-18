@@ -1,5 +1,5 @@
 [package]
-name = "Junto-Alpha-API"
+name = "junto_holochain_alpha_api"
 version = "0.1.0"
 authors = ["jdeepee <joshuadparkin@gmail.com>"]
 edition = "2018"
@@ -22,3 +22,4 @@ failure = "0.1.5"
 time = "0.1.42"
 num_cpus = "1.10.0"
 bcrypt = "0.4"
+listenfd = "0.3"
