@@ -6,20 +6,30 @@ use std::io;
 use actix_web::{
     web, App, HttpResponse, HttpServer, Error, middleware
 };
-use diesel::r2d2::ConnectionManager;
-use diesel::pg::PgConnection;
-use futures::future::{Future, ok};
-use std::env;
+use futures::future::Future;
 use std::path::Path;
+use bcrypt::{hash, verify};
 
-mod db;
-mod token;
-mod schema;
+pub mod db;
+pub mod utils;
+pub mod schema;
+pub mod errors;
 
-fn register(data: web::Json<db::models::RegisterData>, pool: web::Data<db::Pool>) -> Box<dyn Future<Item = HttpResponse, Error = Error>> {
-    Box::new(ok::<_, Error>(
-        HttpResponse::Ok().content_type("text/html").body("Hello!"),
-    ))
+fn index() -> HttpResponse {
+    HttpResponse::Ok().body("Junto Holochain Alpha API")
+}
+
+fn register(data: web::Json<db::models::RegisterData>, pool: web::Data<db::Pool>) -> impl Future<Item = HttpResponse, Error = Error>  {
+    web::block(move || utils::holochain::assign_agent(pool)).then(move |pub_key| match pub_key{
+        Ok(pub_key) => {
+            let id = uuid::Uuid::new_v4();
+            let hashed_password = hash(data.password.clone(), 13).map_err(|_err| errors::JuntoApiError::InternalError)?;
+            let user = db::models::Users{id: id, email: data.email.clone(), password: hashed_password, pub_address: pub_key, 
+                        first_name: data.first_name.clone(), last_name: data.last_name.clone()};
+            Ok(HttpResponse::Ok().json(user))
+        },
+        Err(_) => Ok(HttpResponse::InternalServerError().into()),
+    })
 }
 
 fn main() -> io::Result<()> {
@@ -27,16 +37,13 @@ fn main() -> io::Result<()> {
     dotenv::from_path(&path).expect("Unable to load .env");
     let sys = actix_rt::System::new("api");
 
-    let database_url = env::var("DATABASE_URL").unwrap_or_else(|e| {
-        panic!("could not find {}: {}", "DATABASE_URL", e)
-    });
-    let manager = ConnectionManager::<PgConnection>::new(database_url);
-    let pool = db::Pool::new(manager).unwrap();
+    let pool = utils::load_connection_pool();
 
     HttpServer::new(move || {
         App::new()
             .data(pool.clone())
             .wrap(middleware::Logger::default())
+            .route("/", web::to(index))
             .route("/register", web::to_async(register))
     })
     .bind("127.0.0.1:8080")?

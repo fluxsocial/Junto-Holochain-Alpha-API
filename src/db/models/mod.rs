@@ -11,12 +11,12 @@ use crate::db::Pool;
 #[derive(Debug, Deserialize, Serialize, Validate)]
 pub struct RegisterData{
     #[validate(email)]
-    email: String,
-    password: String,
+    pub email: String,
+    pub password: String,
     #[validate(length(min = 1, max = 20))]
-    first_name: String,
+    pub first_name: String,
     #[validate(length(min = 1, max = 20))]
-    last_name: String
+    pub last_name: String
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Queryable, Insertable)]
@@ -41,7 +41,7 @@ impl Users {
         }
     }
 
-    pub fn number_of_users(&self, pool: web::Data<Pool>) -> Result<usize, Error> {
+    pub fn number_of_users(pool: web::Data<Pool>) -> Result<usize, Error> {
         let conn: &PgConnection = &pool.get().unwrap();
         let users_count = users::table.load::<Users>(&*conn)?;
         Ok(users_count.len())
