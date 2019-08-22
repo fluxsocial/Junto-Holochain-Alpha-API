@@ -1,4 +1,4 @@
-use diesel::r2d2::ConnectionManager;
+use diesel::r2d2::{ConnectionManager, Pool};
 use diesel::pg::PgConnection;
 use std::env;
 
@@ -12,5 +12,5 @@ pub fn load_connection_pool() -> db::Pool{
         panic!("could not find {}: {}", "DATABASE_URL", e)
     });
     let manager = ConnectionManager::<PgConnection>::new(database_url);
-    db::Pool::new(manager).unwrap()
+    Pool::builder().build(manager).unwrap()
 }
