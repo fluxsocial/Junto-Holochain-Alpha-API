@@ -49,10 +49,10 @@ pub struct Token {
 
 impl Token {
     /// Create a new default token for a given user_id
-    pub fn create(user_id: &str) -> Result<String, TokenError> {
+    pub fn create(user_id: String) -> Result<String, TokenError> {
         const DEFAULT_TOKEN_VALIDITY: i64 = 3600;
         let claim = Token {
-            sub: user_id.to_owned(),
+            sub: user_id,
             exp: get_time().sec + DEFAULT_TOKEN_VALIDITY,
             iat: get_time().sec,
             jti: Uuid::new_v4().to_string(),
@@ -64,6 +64,6 @@ impl Token {
     pub fn verify(token: &str) -> Result<String, TokenError> {
         let data = decode::<Token>(token, SECRET, &Validation::default())
             .map_err(|_| TokenError::Verify)?;
-        Self::create(&data.claims.sub)
+        Self::create(data.claims.sub)
     }
 }

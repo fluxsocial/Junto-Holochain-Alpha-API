@@ -1,5 +1,6 @@
 #[macro_use] extern crate validator_derive;
 #[macro_use] extern crate serde_derive;
+#[macro_use] extern crate serde_json;
 #[macro_use] extern crate diesel;
 
 use std::io;
@@ -25,13 +26,14 @@ fn register(data: web::Json<db::models::RegisterData>, pool: web::Data<db::Pool>
         let pub_key = utils::holochain::assign_agent(&pool)?;
         let id = uuid::Uuid::new_v4();
         let hashed_password = hash(data.password.clone(), 13).map_err(|_err| errors::JuntoApiError::InternalError)?;
-        let user = db::models::Users{id: id, email: data.email.clone(), password: hashed_password, pub_address: pub_key, 
+        let user = db::models::Users{id: id.clone(), email: data.email.clone(), password: hashed_password, pub_address: pub_key, 
                     first_name: data.first_name.clone(), last_name: data.last_name.clone()};
         db::models::Users::insert_user(&user, &pool).map_err(|_err| errors::JuntoApiError::InternalError)?;
-        Ok(user)
+        let token = utils::jwt::Token::create(format!("{}", id)).map_err(|_err| errors::JuntoApiError::InternalError)?;
+        Ok(token)
     })
-    .then(|user: Result<db::models::Users, actix_threadpool::BlockingError<errors::JuntoApiError>>| match user {
-        Ok(user) => Ok(HttpResponse::Ok().json(user)),
+    .then(|token: Result<String, actix_threadpool::BlockingError<errors::JuntoApiError>>| match token {
+        Ok(token) => Ok(HttpResponse::Ok().json(json!({"token": token}))),
         Err(err) => match err {
                         actix_threadpool::BlockingError::Error(err) => {
                             Ok(err.error_response())
@@ -58,7 +60,7 @@ fn main() -> io::Result<()> {
             .route("/", web::get().to(index))
             .route("/register", web::post().to_async(register))
     });
-    
+
     server = if let Some(l) = listenfd.take_tcp_listener(0).unwrap() {
         server.listen(l).unwrap()
     } else {
