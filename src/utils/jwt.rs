@@ -1,12 +1,14 @@
 
 //! Everything related to web token handling
 
-use actix_web::{HttpResponse, ResponseError};
+use actix_web::{HttpResponse, ResponseError, HttpRequest};
 use failure::Fail;
 use jsonwebtoken::{decode, encode, Header, Validation};
 use serde::{Deserialize, Serialize};
 use time::get_time;
 use uuid::Uuid;
+
+use crate::errors::JuntoApiError;
 
 const SECRET: &[u8] = b"my_secret";
 
@@ -65,5 +67,20 @@ impl Token {
         let data = decode::<Token>(token, SECRET, &Validation::default())
             .map_err(|_| TokenError::Verify)?;
         Self::create(data.claims.sub)
+    }
+
+    pub fn verify_request_headers(req: HttpRequest) -> Result<String, JuntoApiError> {
+        // read the AUTH header from the request
+        let token = req.headers().get("AUTH").map(|value| value.to_str().ok())
+                        .ok_or(JuntoApiError::Unauthorized)?;
+
+        match token {
+            Some(t) => {
+                // check that the token is valid
+                Token::verify(t).map_err(|_err| JuntoApiError::Unauthorized)?;
+                Ok(t.to_string())
+            },
+            None => Err(JuntoApiError::Unauthorized)
+        }
     }
 }

@@ -9,6 +9,8 @@ pub enum JuntoApiError {
     BadClientData,
     #[fail(display = "Request Timeout")]
     Timeout,
+    #[fail(display = "Unauthorized Request")]
+    Unauthorized,
 }
 
 impl error::ResponseError for JuntoApiError {
@@ -19,6 +21,7 @@ impl error::ResponseError for JuntoApiError {
             }
             JuntoApiError::BadClientData => HttpResponse::new(http::StatusCode::BAD_REQUEST),
             JuntoApiError::Timeout => HttpResponse::new(http::StatusCode::GATEWAY_TIMEOUT),
+            JuntoApiError::Unauthorized => HttpResponse::new(http::StatusCode::UNAUTHORIZED),
         }
     }
 }
