@@ -2,6 +2,7 @@ use actix_web::{error::Error as AWError};
 use validator::Validate;
 use uuid::Uuid;
 use diesel::prelude::*;
+use bcrypt::verify;
 
 use crate::schema::users;
 use crate::db::{Connection, Pool};
@@ -15,7 +16,27 @@ pub struct RegisterData{
     #[validate(length(min = 1, max = 20))]
     pub first_name: String,
     #[validate(length(min = 1, max = 20))]
-    pub last_name: String
+    pub last_name: String,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct HolochainUserRequst{
+    pub params: String
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct HolochainRequest{
+    pub id: String,
+    pub jsonrpc: String,
+    pub method: String,
+    pub params: String,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct HolochainResponse{
+    pub id: String,
+    pub jsonrpc: String,
+    pub result: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Queryable, Insertable)]
@@ -26,7 +47,24 @@ pub struct Users {
     pub password: String,
     pub pub_address: String,
     pub first_name: String,
-    pub last_name: String
+    pub last_name: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct SlimUser {
+    pub id: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct AuthData {
+    pub email: String,
+    pub password: String,
+}
+
+impl From<Users> for SlimUser {
+    fn from(user: Users) -> Self {
+        SlimUser { id: user.id.to_string() }
+    }
 }
 
 impl Users {
@@ -56,5 +94,33 @@ impl Users {
             .get_result(&conn)
             .unwrap();
         Ok(())
+    }
+
+    pub fn get_pub_key<'a>(user_id: &'a str, pool: &Pool) -> Result<String, errors::JuntoApiError> {
+        use crate::schema::users::dsl::*;
+        let user_id = Uuid::parse_str(user_id).unwrap();
+        let conn: Connection = pool.get().unwrap();
+        match users.select(pub_address).filter(id.eq(user_id)).first::<String>(&conn) {
+            Ok(entry) => Ok(entry),
+            Err(_err) => Err(errors::JuntoApiError::InternalError)
+        }
+    }
+
+    pub fn can_login(auth_data: AuthData, pool: &Pool) -> Result<SlimUser, errors::JuntoApiError> {
+        use crate::schema::users::dsl::*;
+        let conn: Connection = pool.get().unwrap();
+
+        let mut items = users
+            .filter(email.eq(&auth_data.email))
+            .load::<Users>(&conn).map_err(|_err| errors::JuntoApiError::InternalError)?;
+
+        if let Some(user) = items.pop() {
+            if let Ok(matching) = verify(&user.password, &auth_data.password) {
+                if matching {
+                    return Ok(user.into()); // convert into slimUser
+                }
+            }
+        }
+        Err(errors::JuntoApiError::Unauthorized)
     }
 }
