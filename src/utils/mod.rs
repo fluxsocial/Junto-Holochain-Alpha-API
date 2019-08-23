@@ -4,7 +4,6 @@ use std::env;
 
 use crate::db;
 
-pub mod jwt;
 pub mod holochain;
 pub mod middleware;
 

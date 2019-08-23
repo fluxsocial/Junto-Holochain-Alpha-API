@@ -7,6 +7,7 @@ use std::io;
 use actix_web::{
     web, App, HttpResponse, HttpServer, middleware
 };
+use actix_identity::{CookieIdentityPolicy, IdentityService};
 use std::path::Path;
 use listenfd::ListenFd;
 
@@ -26,14 +27,29 @@ fn main() -> io::Result<()> {
     
     let sys = actix_rt::System::new("api");
     let pool = utils::load_connection_pool();
+    let domain: String = std::env::var("DOMAIN").unwrap_or_else(|_| "localhost".to_string());
     let mut listenfd = ListenFd::from_env();
 
     let mut server = HttpServer::new(move || {
         App::new()
-            .data(pool.clone())
             .wrap(middleware::Logger::default())
+            .wrap(IdentityService::new(
+                CookieIdentityPolicy::new("supersupersupersecretsecretkey...".as_bytes())
+                    .name("auth")
+                    .path("/")
+                    .domain(domain.as_str())
+                    .max_age_time(chrono::Duration::days(1))
+                    .secure(false), // this can only be true if you have https
+            ))
+            .data(pool.clone())
             .route("/", web::get().to(index))
             .route("/register", web::post().to_async(handlers::auth::register))
+            .service(
+                web::resource("/auth")
+                    .route(web::post().to_async(handlers::auth::login))
+                    .route(web::delete().to(handlers::auth::logout))
+                    .route(web::get().to_async(handlers::auth::get_me)),
+            )
             // .route("/holochain", web::post().to_async(holochain))
     });
 

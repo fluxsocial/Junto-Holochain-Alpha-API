@@ -2,7 +2,7 @@ use actix_web::{error::ResponseError, HttpResponse, web};
 use actix_identity::Identity;
 use actix_threadpool::BlockingError;
 use futures::future::Future;
-use bcrypt::hash;
+use bcrypt::{hash, DEFAULT_COST};
 
 use crate::db;
 use crate::errors;
@@ -15,7 +15,7 @@ pub fn register(
     web::block(move || {
         let pub_key = utils::holochain::assign_agent(&pool)?;
         let user_id = uuid::Uuid::new_v4();
-        let hashed_password = hash(data.password.clone(), 13).map_err(|_err| errors::JuntoApiError::InternalError)?;
+        let hashed_password = hash(data.password.clone(), DEFAULT_COST).map_err(|_err| errors::JuntoApiError::InternalError)?;
         let user = db::models::Users{id: user_id.clone(), email: data.email.clone(), password: hashed_password, pub_address: pub_key, 
                     first_name: data.first_name.clone(), last_name: data.last_name.clone()};
         db::models::Users::insert_user(&user, &pool).map_err(|_err| errors::JuntoApiError::InternalError)?;

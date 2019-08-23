@@ -114,8 +114,14 @@ impl Users {
             .filter(email.eq(&auth_data.email))
             .load::<Users>(&conn).map_err(|_err| errors::JuntoApiError::InternalError)?;
 
+        println!("users: {:?}", items);
+
         if let Some(user) = items.pop() {
-            if let Ok(matching) = verify(&user.password, &auth_data.password) {
+            println!("items popped");
+            let verify_res = verify(&auth_data.password, &user.password);
+            println!("{:?}", verify_res);
+            if let Ok(matching) = verify(&auth_data.password, &user.password) {
+                println!("Matching");
                 if matching {
                     return Ok(user.into()); // convert into slimUser
                 }
