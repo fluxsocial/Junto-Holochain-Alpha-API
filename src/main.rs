@@ -5,44 +5,19 @@
 
 use std::io;
 use actix_web::{
-    web, App, HttpResponse, HttpServer, Error as AWError, middleware, error::ResponseError
+    web, App, HttpResponse, HttpServer, middleware
 };
-use futures::future::Future;
 use std::path::Path;
-use bcrypt::{hash, verify};
 use listenfd::ListenFd;
 
 pub mod db;
 pub mod utils;
 pub mod schema;
 pub mod errors;
+pub mod handlers;
 
 fn index() -> HttpResponse {
     HttpResponse::Ok().body("Junto Holochain Alpha API")
-}
-
-fn register(data: web::Json<db::models::RegisterData>, pool: web::Data<db::Pool>) -> impl Future<Item = HttpResponse, Error = AWError>  {
-    web::block(move || {
-        let pub_key = utils::holochain::assign_agent(&pool)?;
-        let id = uuid::Uuid::new_v4();
-        let hashed_password = hash(data.password.clone(), 13).map_err(|_err| errors::JuntoApiError::InternalError)?;
-        let user = db::models::Users{id: id.clone(), email: data.email.clone(), password: hashed_password, pub_address: pub_key, 
-                    first_name: data.first_name.clone(), last_name: data.last_name.clone()};
-        db::models::Users::insert_user(&user, &pool).map_err(|_err| errors::JuntoApiError::InternalError)?;
-        let token = utils::jwt::Token::create(format!("{}", id)).map_err(|_err| errors::JuntoApiError::InternalError)?;
-        Ok(token)
-    })
-    .then(|token: Result<String, actix_threadpool::BlockingError<errors::JuntoApiError>>| match token {
-        Ok(token) => Ok(HttpResponse::Ok().json(json!({"token": token}))),
-        Err(err) => match err {
-                        actix_threadpool::BlockingError::Error(err) => {
-                            Ok(err.error_response())
-                        },
-                        actix_threadpool::BlockingError::Canceled => {
-                            Ok(HttpResponse::InternalServerError().into())
-                        }
-                    },
-    })
 }
 
 fn main() -> io::Result<()> {
@@ -58,7 +33,8 @@ fn main() -> io::Result<()> {
             .data(pool.clone())
             .wrap(middleware::Logger::default())
             .route("/", web::get().to(index))
-            .route("/register", web::post().to_async(register))
+            .route("/register", web::post().to_async(handlers::auth::register))
+            // .route("/holochain", web::post().to_async(holochain))
     });
 
     server = if let Some(l) = listenfd.take_tcp_listener(0).unwrap() {
