@@ -54,6 +54,7 @@ fn main() -> io::Result<()> {
                 web::resource("/auth")
                     .route(web::post().to_async(handlers::auth::login))
                     .route(web::delete().to(handlers::auth::logout))
+                    .route(web::get().to(handlers::auth::get_me))
             )
             // .route("/holochain", web::post().to_async(holochain))
     });
