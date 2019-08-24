@@ -5,7 +5,6 @@ use std::env;
 use crate::db;
 
 pub mod holochain;
-pub mod middleware;
 
 pub fn load_connection_pool() -> db::Pool{
     let database_url = env::var("DATABASE_URL").unwrap_or_else(|e| {

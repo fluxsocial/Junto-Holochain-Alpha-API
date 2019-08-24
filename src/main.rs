@@ -7,7 +7,7 @@ use std::io;
 use actix_web::{
     web, App, HttpResponse, HttpServer, middleware
 };
-use actix_identity::{CookieIdentityPolicy, IdentityService};
+use actix_identity::{CookieIdentityPolicy, IdentityService, Identity};
 use std::path::Path;
 use listenfd::ListenFd;
 
@@ -19,6 +19,11 @@ pub mod handlers;
 
 fn index() -> HttpResponse {
     HttpResponse::Ok().body("Junto Holochain Alpha API")
+}
+
+fn test(id: Identity) -> HttpResponse {
+    println!("Identity of request {:?}", id.identity());
+    HttpResponse::Ok().body("Test response")
 }
 
 fn main() -> io::Result<()> {
@@ -43,12 +48,12 @@ fn main() -> io::Result<()> {
             ))
             .data(pool.clone())
             .route("/", web::get().to(index))
+            .route("/test", web::get().to(test))
             .route("/register", web::post().to_async(handlers::auth::register))
             .service(
                 web::resource("/auth")
                     .route(web::post().to_async(handlers::auth::login))
                     .route(web::delete().to(handlers::auth::logout))
-                    .route(web::get().to_async(handlers::auth::get_me)),
             )
             // .route("/holochain", web::post().to_async(holochain))
     });

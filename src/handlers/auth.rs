@@ -59,7 +59,3 @@ pub fn logout(id: Identity) -> HttpResponse {
     id.forget();
     HttpResponse::Ok().finish()
 }
-
-pub fn get_me(logged_user: utils::middleware::LoggedUser) -> HttpResponse {
-    HttpResponse::Ok().json(logged_user)
-}
