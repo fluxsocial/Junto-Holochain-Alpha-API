@@ -4,4 +4,4 @@ use diesel::pg::PgConnection;
 pub mod models;
 
 pub type Pool = r2d2::Pool<ConnectionManager<PgConnection>>;
-pub type Connection = PooledConnection<PgConnection>;
+pub type Connection = PooledConnection<ConnectionManager<PgConnection>>;
