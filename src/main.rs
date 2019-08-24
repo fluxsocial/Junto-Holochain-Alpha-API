@@ -56,7 +56,7 @@ fn main() -> io::Result<()> {
                     .route(web::delete().to(handlers::auth::logout))
                     .route(web::get().to(handlers::auth::get_me))
             )
-            // .route("/holochain", web::post().to_async(holochain))
+            .route("/holochain", web::post().to_async(handlers::holochain::holochain))
     });
 
     server = if let Some(l) = listenfd.take_tcp_listener(0).unwrap() {

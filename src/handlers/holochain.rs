@@ -6,11 +6,12 @@ use crate::errors;
 use crate::db;
 use crate::utils;
 
-fn holochain(data: web::Json<db::models::HolochainUserRequst>, pool: web::Data<db::Pool>, logged_user: utils::wrapper::LoggedUser) 
+pub fn holochain(data: web::Json<db::models::HolochainUserRequst>, pool: web::Data<db::Pool>, logged_user: utils::wrapper::LoggedUser) 
     -> impl Future<Item = HttpResponse, Error = errors::JuntoApiError> {
     web::block(move ||{
         println!("User ID: {:?}", logged_user.id);
         let pub_address = db::models::Users::get_pub_key(&logged_user.id, &pool)?;
+        println!("Holochain request using pub key: {:?}", pub_address);
         let holochain_call = utils::holochain::call_holochain(&data, pub_address)?;
         Ok(holochain_call)
     })
