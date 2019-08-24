@@ -21,7 +21,23 @@ pub struct RegisterData{
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct HolochainUserRequst{
-    pub params: String
+    pub args: String,
+    pub function: String,
+    pub zome: String,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct HolochainUserRequstWithInstance{
+    pub args: String,
+    pub function: String,
+    pub zome: String,
+    pub instance_id: String,
+}
+
+impl HolochainUserRequstWithInstance{
+    pub fn from_user_req(request: HolochainUserRequst, pub_key: String) -> Self {
+        HolochainUserRequstWithInstance{args: request.args, function: request.function, zome: request.zome, instance_id: format!("junto-app-{}", pub_key)}
+    }
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -29,7 +45,16 @@ pub struct HolochainRequest{
     pub id: String,
     pub jsonrpc: String,
     pub method: String,
-    pub params: String,
+    pub params: HolochainUserRequstWithInstance,
+}
+
+impl HolochainRequest{
+    pub fn from_user_req(request: HolochainUserRequst, pub_key: String) -> Self{
+        let req_params = HolochainUserRequstWithInstance{args: request.args, function: request.function, 
+            zome: request.zome, instance_id: format!("junto-app-{}", pub_key)};
+
+        HolochainRequest{id: pub_key, jsonrpc: "2.0".to_string(), method: "call".to_string(), params: req_params}
+    }
 }
 
 #[derive(Debug, Deserialize, Serialize)]

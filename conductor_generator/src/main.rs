@@ -79,7 +79,7 @@ pub fn create_persistent_directories(path: &str, key_dir: &str, number_of_agents
 }
 
 fn main(){
-    let number_of_agents = 2;
+    let number_of_agents = 50; //number of agents to be generated and added to the conductor configuration 
     let key_dir = "/home/josh/.config/holochain/keys/";
 
     let current_keys: Vec<_> = fs::read_dir(key_dir).unwrap().map(|res| res.unwrap().path()).collect();
