@@ -4,21 +4,21 @@ use actix_threadpool::BlockingError;
 use futures::future::Future;
 use bcrypt::{hash, DEFAULT_COST};
 
-use crate::db;
+use crate::models::{self, db};
 use crate::errors;
 use crate::utils;
 
 pub fn register(
-    data: web::Json<db::models::RegisterData>, 
+    data: web::Json<models::user::RegisterData>, 
     pool: web::Data<db::Pool>
 ) -> impl Future<Item = HttpResponse, Error = errors::JuntoApiError> {
     web::block(move || {
         let pub_key = utils::holochain::assign_agent(&pool)?;
         let user_id = uuid::Uuid::new_v4();
         let hashed_password = hash(data.password.clone(), DEFAULT_COST).map_err(|_err| errors::JuntoApiError::InternalError)?;
-        let user = db::models::Users{id: user_id.clone(), email: data.email.clone(), password: hashed_password, pub_address: pub_key, 
+        let user = db::user::Users{id: user_id.clone(), email: data.email.clone(), password: hashed_password, pub_address: pub_key, 
                     first_name: data.first_name.clone(), last_name: data.last_name.clone()};
-        db::models::Users::insert_user(&user, &pool).map_err(|_err| errors::JuntoApiError::InternalError)?;
+        db::user::Users::insert_user(&user, &pool).map_err(|_err| errors::JuntoApiError::InternalError)?;
         Ok(user_id.to_string())
     })
     .then(|user_id: Result<String, BlockingError<errors::JuntoApiError>>| match user_id {
@@ -35,12 +35,12 @@ pub fn register(
 }
 
 pub fn login(
-    auth_data: web::Json<db::models::AuthData>,
+    auth_data: web::Json<models::user::AuthData>,
     id: Identity,
     pool: web::Data<db::Pool>,
 ) -> impl Future<Item = HttpResponse, Error = errors::JuntoApiError> {
-    web::block(move || db::models::Users::can_login(auth_data.into_inner(), &pool)).then(
-        move |res: Result<db::models::SlimUser, BlockingError<errors::JuntoApiError>>| match res {
+    web::block(move || db::user::Users::can_login(auth_data.into_inner(), &pool)).then(
+        move |res: Result<db::user::SlimUser, BlockingError<errors::JuntoApiError>>| match res {
             Ok(user) => {
                 let user_string = serde_json::to_string(&user).unwrap();
                 id.remember(user_string);
