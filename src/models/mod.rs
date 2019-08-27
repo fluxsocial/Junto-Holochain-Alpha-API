@@ -6,7 +6,7 @@ pub mod persepective;
 pub mod user;
 pub mod db;
 
-//General holochain request data types
+//Holochain zomes
 #[derive(Debug, Deserialize, Serialize)]
 pub enum Zomes {
     Collection,
@@ -14,33 +14,72 @@ pub enum Zomes {
     Expression,
     Group,
     Perspective,
-    User
+    User,
 }
 
+//Holochain zome functions present in each zome
+#[derive(Debug, Deserialize, Serialize)]
 pub enum CollectionZomeFunctions{
-
+    CreateDen,
+    GetUserDens,
+    IsCollectionOwner,
+    CreateCollection,
 }
 
+#[derive(Debug, Deserialize, Serialize)]
 pub enum ConfigZomeFunctions{
-    
+    GetEnv,
+    GetCurrentBitPrefix,
+    UpdateBitPrefix,
 }
 
+#[derive(Debug, Deserialize, Serialize)]
 pub enum ExpressionZomeFunctions{
-    
+    QueryExpression,
+    GetExpression,
+    PostExpression,
+    PostCommentExpression,
+    PostResonation,
 }
 
+#[derive(Debug, Deserialize, Serialize)]
 pub enum GroupZomeFunctions{
-    
+    CreatePack,
+    AddPackMember,
+    AddMemberToGroup,
+    RemoveGroupMember,
+    GetGroupMembers,
+    IsGroupOwner,
+    IsGroupMember,
+    GetUserPacks,
+    GetUserMemberPacks,
 }
 
-pub enum PerZomeFunctions{
-    
+#[derive(Debug, Deserialize, Serialize)]
+pub enum PerspectiveZomeFunctions{
+    CreatePerspective,
+    AddUserToPerspective,
+    GetPerspectiveUsers,
 }
 
+#[derive(Debug, Deserialize, Serialize)]
 pub enum UserZomeFunctions{
-    
+    CreateUser,
+    GetUsernameFromAddress,
+    GetUserProfileFromAddress,
+    GetUserProfileByAgentAddress,
+    GetUserUsernameByAgentAddress,
 }
 
+//Holochain privacy type
+#[derive(Serialize, Deserialize, Debug)]
+pub enum Privacy {
+    Public, //Viewable by everyone
+    Shared, //Viewable by selected people
+    Private //Viewable by only owner
+}
+
+//API -> Holochain conductor request data types
 #[derive(Debug, Deserialize, Serialize)]
 pub struct HolochainUserRequest{
     pub args: String,

@@ -1,5 +1,6 @@
 use validator::Validate;
 
+//API request data
 #[derive(Debug, Deserialize, Serialize, Validate)]
 pub struct RegisterData{
     #[validate(email)]
@@ -15,4 +16,38 @@ pub struct RegisterData{
 pub struct AuthData {
     pub email: String,
     pub password: String,
+}
+
+//Holochain Types
+#[derive(Serialize, Deserialize, Debug)]
+pub struct CreateUserInformation{
+    pub username: String,
+    pub first_name: String,
+    pub last_name: String,
+    pub profile_picture: String,
+    pub bio: String
+}
+
+//Holochain request data
+#[derive(Debug, Deserialize, Serialize)]
+pub struct CreateUserRequestData {
+    pub user_data: CreateUserInformation
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct GetUsernameFromAddressRequestData {
+    pub username_address: String,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct GetUserProfileFromAddressRequestData {
+    pub username_address: String,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct GetUserProfileByAgentAddressRequestData {
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct GetUserUsernameByAgentAddressRequestData {
 }
