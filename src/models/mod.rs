@@ -3,14 +3,6 @@ use serde_json::Value;
 pub mod user;
 pub mod db;
 
-//Holochain privacy type
-#[derive(Serialize, Deserialize, Debug)]
-pub enum Privacy {
-    Public, //Viewable by everyone
-    Shared, //Viewable by selected people
-    Private //Viewable by only owner
-}
-
 //API -> Holochain conductor request data types
 #[derive(Debug, Deserialize, Serialize)]
 pub struct HolochainUserRequest{
@@ -21,7 +13,7 @@ pub struct HolochainUserRequest{
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct HolochainUserRequestWithInstance{
-    pub args: Value,//no mapping from user request data -> holochain types using serde - instead will be done manually by passing string in order; zome -> function -> args
+    pub args: Value,
     pub function: String,
     pub zome: String,
     pub instance_id: String,
