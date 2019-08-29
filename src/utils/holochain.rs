@@ -15,8 +15,11 @@ pub fn assign_agent(pool: &db::Pool) -> Result<String, errors::JuntoApiError> {
 }
 
 pub fn call_holochain(data: models::HolochainUserRequest, pub_address: String) -> Result<models::HolochainResponse, errors::JuntoApiError>{
-    let data = models::HolochainRequest::from_user_req(data, pub_address);
-    println!("Request data bef: {:?}", data);
+    let data = models::HolochainRequest::from_user_req(data, pub_address).map_err(|err| {
+        println!("Serde error: {:?}", err);
+        errors::JuntoApiError::BadClientData
+    })?;
+    println!("Request data: {:?}", data);
     //let request_data = serde_json::to_string(&data).map_err(|_err| errors::JuntoApiError::InternalError)?;
     let client = reqwest::Client::new();
     let mut res = client.post(HC_CONDUCTOR)
