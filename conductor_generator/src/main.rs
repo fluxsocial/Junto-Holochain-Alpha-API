@@ -123,11 +123,12 @@ hash = \"Qmdu6RjFXeYfAL8MzpGG9RGUPReo36FLeNW4bZFpVkcY2N\"
 #id = \"deepkey\"
 #hash = \"QmdEqRWmJ7MGfxQVKJcqdzghQ19ynK7CanUeTQFMoFeiPo\"
 
-#[network]
-#type=\"n3h\"
+[network]
+type=\"n3h\"
+n3h_persistence_path = \"/holochain/n3h\"
+n3h_log_level = 't'
 #bootstrap_nodes = []
 #n3h_mode = \"REAL\"
-#n3h_persistence_path = \"/holochain/n3h\"
 #Agent for hosting applications";
 
     fs::write("./config.toml", general_conductor_data).expect("Unable to write file");
