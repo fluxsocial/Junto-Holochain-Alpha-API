@@ -1,10 +1,10 @@
 use actix_web::{HttpRequest, dev::Payload, FromRequest};
 use actix_identity::Identity;
 
-use crate::db;
+use crate::models;
 use crate::errors;
 
-pub type LoggedUser = db::models::SlimUser;
+pub type LoggedUser = models::db::user::SlimUser;
 
 impl FromRequest for LoggedUser {
     type Config = ();

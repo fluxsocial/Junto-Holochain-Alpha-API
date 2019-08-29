@@ -1,43 +1,14 @@
 use actix_web::{error::Error as AWError};
-use validator::Validate;
-use uuid::Uuid;
 use diesel::prelude::*;
 use bcrypt::verify;
+use uuid::Uuid;
 
 use crate::schema::users;
-use crate::db::{Connection, Pool};
+use crate::models::{
+    self,
+    db::{Connection, Pool}
+};
 use crate::errors;
-
-#[derive(Debug, Deserialize, Serialize, Validate)]
-pub struct RegisterData{
-    #[validate(email)]
-    pub email: String,
-    pub password: String,
-    #[validate(length(min = 1, max = 20))]
-    pub first_name: String,
-    #[validate(length(min = 1, max = 20))]
-    pub last_name: String,
-}
-
-#[derive(Debug, Deserialize, Serialize)]
-pub struct HolochainUserRequst{
-    pub params: String
-}
-
-#[derive(Debug, Deserialize, Serialize)]
-pub struct HolochainRequest{
-    pub id: String,
-    pub jsonrpc: String,
-    pub method: String,
-    pub params: String,
-}
-
-#[derive(Debug, Deserialize, Serialize)]
-pub struct HolochainResponse{
-    pub id: String,
-    pub jsonrpc: String,
-    pub result: String,
-}
 
 #[derive(Debug, Clone, Serialize, Deserialize, Queryable, Insertable)]
 #[table_name= "users" ]
@@ -53,12 +24,6 @@ pub struct Users {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SlimUser {
     pub id: String,
-}
-
-#[derive(Debug, Deserialize)]
-pub struct AuthData {
-    pub email: String,
-    pub password: String,
 }
 
 impl From<Users> for SlimUser {
@@ -106,7 +71,7 @@ impl Users {
         }
     }
 
-    pub fn can_login(auth_data: AuthData, pool: &Pool) -> Result<SlimUser, errors::JuntoApiError> {
+    pub fn can_login(auth_data: models::user::AuthData, pool: &Pool) -> Result<SlimUser, errors::JuntoApiError> {
         use crate::schema::users::dsl::*;
         let conn: Connection = pool.get().unwrap();
 

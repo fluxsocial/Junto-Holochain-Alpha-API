@@ -11,7 +11,7 @@ use actix_identity::{CookieIdentityPolicy, IdentityService, Identity};
 use std::path::Path;
 use listenfd::ListenFd;
 
-pub mod db;
+pub mod models;
 pub mod utils;
 pub mod schema;
 pub mod errors;

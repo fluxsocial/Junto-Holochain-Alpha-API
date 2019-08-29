@@ -79,7 +79,7 @@ pub fn create_persistent_directories(path: &str, key_dir: &str, number_of_agents
 }
 
 fn main(){
-    let number_of_agents = 2;
+    let number_of_agents = 2; //number of agents to be generated and added to the conductor configuration 
     let key_dir = "/home/josh/.config/holochain/keys/";
 
     let current_keys: Vec<_> = fs::read_dir(key_dir).unwrap().map(|res| res.unwrap().path()).collect();
@@ -111,23 +111,23 @@ fn main(){
 
     let general_conductor_data = "
 persistence_dir = \"/holochain/persistence\"
-signing_service_uri = \"http://localhost:8888\"
+#signing_service_uri = \"http://localhost:8888\"
 
 [[dnas]]
 file = \"/holochain/dnas/Junto/junto-rust/dist/junto-rust.dna.json\"
 id = \"junto-app\"
-hash = \"QmQLj5yaPRybPDum2ffs6y886F5KbSCMLVCgUL32ks8fTZ\"
+hash = \"Qmdu6RjFXeYfAL8MzpGG9RGUPReo36FLeNW4bZFpVkcY2N\"
 
 #[[dnas]]
 #file = \"/holochain/dnas/DeepKey/dist/DeepKey.dna.json\"
 #id = \"deepkey\"
 #hash = \"QmdEqRWmJ7MGfxQVKJcqdzghQ19ynK7CanUeTQFMoFeiPo\"
 
-[network]
-type=\"n3h\"
-bootstrap_nodes = []
-n3h_mode = \"REAL\"
-n3h_persistence_path = \"/holochain/n3h\"
+#[network]
+#type=\"n3h\"
+#bootstrap_nodes = []
+#n3h_mode = \"REAL\"
+#n3h_persistence_path = \"/holochain/n3h\"
 #Agent for hosting applications";
 
     fs::write("./config.toml", general_conductor_data).expect("Unable to write file");
