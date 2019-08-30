@@ -3,3 +3,6 @@ name = "conductor_generator"
 version = "0.1.0"
 authors = ["jdeepee <joshuadparkin@gmail.com>"]
 edition = "2018"
+
+[dependencies]
+clap = "2.33.0"

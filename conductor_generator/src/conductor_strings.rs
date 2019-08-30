@@ -1,4 +1,4 @@
-static general_conductor_data: &str = "
+pub static GENERAL_CONDUCTOR_DATA: &str = "
 persistence_dir = \"/holochain/persistence\"
 #signing_service_uri = \"http://localhost:8888\"
 
@@ -20,12 +20,12 @@ n3h_log_level = 't'
 #n3h_mode = \"REAL\"
 #Agent for hosting applications";
 
-static interface_general: &str = "
+pub static INTERFACE_GENERAL: &str = "
 [[interfaces]]
 id = \"http interface\"
 admin = true";
 
-static interface_final: &str = "
+pub static INTERFACE_FINAL: &str = "
 \t[interfaces.driver]
 \ttype = \"http\"
 \tport = 4000";
