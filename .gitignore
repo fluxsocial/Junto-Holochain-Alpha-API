@@ -2,3 +2,4 @@
 **/*.rs.bk
 .vscode
 conductor_generator/target
+.DS_STORE
