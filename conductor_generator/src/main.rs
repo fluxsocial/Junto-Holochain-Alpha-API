@@ -1,6 +1,9 @@
 use std::process::{Command, Stdio};
 use std::fs;
 use std::str;
+use std::env;
+
+use conductor_strings;
 
 fn get_current_config() -> String {
     fs::read_to_string("./config.toml").expect("Unable to read file")
@@ -79,6 +82,7 @@ pub fn create_persistent_directories(path: &str, key_dir: &str, number_of_agents
 }
 
 fn main(){
+    let args: Vec<String> = env::args().collect();
     let number_of_agents = 2; //number of agents to be generated and added to the conductor configuration 
     let key_dir = "/home/josh/.config/holochain/keys/";
 
@@ -109,29 +113,7 @@ fn main(){
 
     println!("All persistent directories created");
 
-    let general_conductor_data = "
-persistence_dir = \"/holochain/persistence\"
-#signing_service_uri = \"http://localhost:8888\"
-
-[[dnas]]
-file = \"/holochain/dnas/Junto/junto-rust/dist/junto-rust.dna.json\"
-id = \"junto-app\"
-hash = \"Qmdu6RjFXeYfAL8MzpGG9RGUPReo36FLeNW4bZFpVkcY2N\"
-
-#[[dnas]]
-#file = \"/holochain/dnas/DeepKey/dist/DeepKey.dna.json\"
-#id = \"deepkey\"
-#hash = \"QmdEqRWmJ7MGfxQVKJcqdzghQ19ynK7CanUeTQFMoFeiPo\"
-
-[network]
-type=\"n3h\"
-n3h_persistence_path = \"/holochain/n3h\"
-n3h_log_level = 't'
-#bootstrap_nodes = []
-#n3h_mode = \"REAL\"
-#Agent for hosting applications";
-
-    fs::write("./config.toml", general_conductor_data).expect("Unable to write file");
+    fs::write("./config.toml", conductor_strings::general_conductor_data).expect("Unable to write file");
 
     let mut current_keys: Vec<_> = fs::read_dir(key_dir).unwrap().map(|res| res.unwrap().path()).collect();
     current_keys = current_keys[0..number_of_agents].to_vec();
@@ -140,27 +122,17 @@ n3h_log_level = 't'
         write_agent(key_dir.to_str().unwrap()).unwrap();
     };
 
-    let interface_general = "
-[[interfaces]]
-id = \"http interface\"
-admin = true";
-
     let current_config = get_current_config();
 
-    fs::write("./config.toml", format!("{}\n{}\n", current_config, interface_general)).expect("Unable to write file");
+    fs::write("./config.toml", format!("{}\n{}\n", current_config, conductor_strings::interface_general)).expect("Unable to write file");
 
     for key_dir in current_keys{
         write_interface(key_dir.to_str().unwrap()).unwrap();
     };
 
-    let interface_final = "
-\t[interfaces.driver]
-\ttype = \"http\"
-\tport = 4000";
-
     let current_config = get_current_config();
 
-    fs::write("./config.toml", format!("{}\n{}\n", current_config, interface_final)).expect("Unable to write file");
+    fs::write("./config.toml", format!("{}\n{}\n", current_config, conductor_strings::interface_final)).expect("Unable to write file");
 
     println!("Conductor config created");
 }
