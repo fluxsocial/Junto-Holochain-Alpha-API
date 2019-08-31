@@ -1,6 +1,7 @@
 use actix_web::{error::ResponseError, web, HttpResponse};
 use actix_threadpool::BlockingError;
 use futures::future::Future;
+use std::process::{Command, Stdio};
 
 use crate::errors;
 use crate::models::{self, db};
@@ -28,4 +29,32 @@ pub fn holochain(data: web::Json<models::HolochainUserRequest>, pool: web::Data<
                         }
         }
     )
+}
+
+pub fn restart_conductor(_logged_user: utils::wrapper::LoggedUser) -> impl Future<Item = HttpResponse, Error = errors::JuntoApiError> {
+    web::block(move || {
+        let restart_call = Command::new("/home/josh/Junto-Holochain-Alpha-API/deployment/restart.sh")
+                            .stdout(Stdio::piped())
+                            .spawn()
+                            .expect("failed to execute process");
+        let output = restart_call.wait_with_output().map_err(|err| {
+            println!("Error: {:?}", err);
+            errors::JuntoApiError::InternalError
+        })?;
+        println!("Conductor was restarted via request, restart response: {:?}", output);
+        Ok(())
+    })
+    .then(|result: Result<(), BlockingError<errors::JuntoApiError>>| {
+        match result {
+            Ok(_) => Ok(HttpResponse::Ok().json(json!({"message": "Conductor is now restarting please allow a few minuted for the conductor to come back online"}))),
+            Err(err) => match err {
+                            BlockingError::Error(err) => {
+                                Ok(err.error_response())
+                            },
+                            BlockingError::Canceled => {
+                                Ok(HttpResponse::InternalServerError().into())
+                            }
+                        }
+        }
+    }) 
 }

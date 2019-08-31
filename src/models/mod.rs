@@ -37,7 +37,7 @@ pub struct HolochainResponse{
 impl HolochainRequest{
     pub fn from_user_req(request: HolochainUserRequest, pub_key: String) -> Result<Self, serde_json::Error>{
         let req_params = HolochainUserRequestWithInstance{args: serde_json::from_str(request.args.as_str())?, function: request.function, 
-            zome: request.zome, instance_id: format!("junto-app-{}", pub_key)};
+            zome: request.zome, instance_id: format!("junto-{}", pub_key)};
 
         Ok(HolochainRequest{id: pub_key, jsonrpc: "2.0".to_string(), method: "call".to_string(), params: req_params})
     }

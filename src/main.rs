@@ -57,6 +57,7 @@ fn main() -> io::Result<()> {
                     .route(web::get().to(handlers::auth::get_me))
             )
             .route("/holochain", web::post().to_async(handlers::holochain::holochain))
+            .route("/restart_conductor", web::post().to_async(handlers::holochain::restart_conductor))
     });
 
     server = if let Some(l) = listenfd.take_tcp_listener(0).unwrap() {
