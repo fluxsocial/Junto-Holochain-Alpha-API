@@ -52,6 +52,12 @@ impl Users {
         Ok(users_count.len())
     }
 
+    pub fn delete_all_users(pool: &Pool) -> Result<(), errors::JuntoApiError> {
+        let conn: Connection = pool.get().unwrap();
+        let _deletion = diesel::delete(users::table).execute(&conn).unwrap();
+        Ok(())
+    }
+
     pub fn insert_user(user: &Users, pool: &Pool) -> Result<(), AWError>{
         let conn: Connection = pool.get().unwrap();
         let _result: Users = diesel::insert_into(users::table)

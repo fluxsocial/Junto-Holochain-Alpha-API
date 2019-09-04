@@ -31,8 +31,9 @@ pub fn holochain(data: web::Json<models::HolochainUserRequest>, pool: web::Data<
     )
 }
 
-pub fn restart_conductor(_logged_user: utils::wrapper::LoggedUser) -> impl Future<Item = HttpResponse, Error = errors::JuntoApiError> {
+pub fn restart_conductor(_logged_user: utils::wrapper::LoggedUser, pool: web::Data<db::Pool>) -> impl Future<Item = HttpResponse, Error = errors::JuntoApiError> {
     web::block(move || {
+        let _delete_users = db::user::Users::delete_all_users(&pool).unwrap();
         let restart_call = Command::new("/home/josh/Junto-Holochain-Alpha-API/deployment/restart.sh")
                             .stdout(Stdio::piped())
                             .spawn()
