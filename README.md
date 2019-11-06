@@ -1,6 +1,6 @@
 # Junto-Holochain-Alpha-API
 
-This repository contains the code to run a HTTP wrapper around a given locally running holochain conductor. This allows the use of a holochain application in a centralized manor for the purposes of testing.
+This repository contains the code to run a HTTP wrapper around a locally running holochain conductor. This allows the use of a holochain application in a centralized manor for the purposes of testing.
 
 Due to the nature of holochain conductors it is impossible to add holochain agent/instances to the conductor without causing the conductor to restart. This is problematic in a multi-user scenario as it means requests may go unheard if a new user wishes to sign up.
 
